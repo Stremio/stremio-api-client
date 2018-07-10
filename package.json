@@ -1,0 +1,14 @@
+{
+    "name": "stremio-api-client",
+    "version": "0.0.1",
+    "main": "index.js",
+    "author": "Smart Code OOD",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Stremio/stremio-api-client.git"
+    },
+    "dependencies": {
+        "events": "1.1.0"
+    }
+}
