@@ -55,13 +55,6 @@ function StremioAPI(options) {
 		});
 	}
 
-	this.request = function(method, params) {
-		// @TODO: authKey
-		return request(method, params);
-	};
-
-	// this.requestWithAuth?
-
 	function onUserUpdated(user) {
 		var currentUserId = self.user && self.user.id;
 		var currentUserLastModified = self.user && self.user.lastModified;
@@ -74,6 +67,14 @@ function StremioAPI(options) {
 		}
 	}
 
+	this.request = function(method, params) {
+		return request(method, params);
+	};
+
+	this.requestWithAuth = function(method, params) {
+		return request(method, Object.assign({ authKey: storage.getJSON('authKey') }, params))
+	};
+
 	this.loginWithEmail = function(email, password) {
 		return request('login', { email: email, password: password })
 		.then(function(result) {
@@ -85,27 +86,27 @@ function StremioAPI(options) {
 
 	this.register = function(email, password) {
 		return request('register', { email: email, password: password })
-			.then(function(result) {
-				var user = result.user;
-				storage.setJSON('authKey', result.authKey)
-				onUserUpdated(user);
-			});
+		.then(function(result) {
+			var user = result.user;
+			storage.setJSON('authKey', result.authKey)
+			onUserUpdated(user);
+		});
 	};
 
 	this.logout = function() {
-		var authKey = storage.getJSON('authKey');
-		return request('logout', { authKey: authKey })
+		return self.requestWithAuth('logout')
 		.then(function() { })
 		.catch(function() { })
 		.then(function() {
+			storage.setJSON('authKey', null);
 			onUserUpdated(null);
 		});
 	};
 
 	this.pullUser = function() {
-		var authKey = storage.getJSON('authKey');
-		return request('getUser', { authKey: authKey })
+		return self.requestWithAuth('getUser')
 		.then(function(user) {
+			// @TODO: replace this function
 			onUserUpdated(user);
 		});
 	};
