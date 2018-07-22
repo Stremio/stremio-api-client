@@ -4,11 +4,18 @@
     "main": "index.js",
     "author": "Smart Code OOD",
     "license": "MIT",
+    "scripts": {
+        "test": "node test/test"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Stremio/stremio-api-client.git"
     },
     "dependencies": {
-        "events": "1.1.0"
+        "events": "1.1.0",
+        "node-fetch": "^2.1.2"
+    },
+    "devDependencies": {
+        "tape": "^4.9.1"
     }
 }

@@ -1,13 +1,16 @@
 var EventEmitter = require('events');
+var fetch = require('node-fetch')
+
+var memStorage = require('./lib/memStorage')
 
 var ENDPOINT = 'https://api.strem.io';
 
 function StremioAPI(options) {
-    var options = Object.assign({ endpoint: ENDPOINT }, options)
+    var options = Object.assign({ endpoint: ENDPOINT, storage: memStorage() }, options)
     var storage = options.storage;
 
     this.events = new EventEmitter();
-    this.user = storage.getUser();
+    this.user = storage.getJSON('user');
 
     var self = this;
 
@@ -57,7 +60,7 @@ function StremioAPI(options) {
         var nextUserLastModified = user && user.lastModified;
         if (currentUserId !== nextUserId || currentUserLastModified < nextUserLastModified) {
             self.user = user;
-            storage.setUser(user);
+            storage.setJSON('user', user);
             self.events.emit('user');
         }
     }
