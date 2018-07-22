@@ -7,6 +7,8 @@ function StremioAPI(options) {
     this.events = new EventEmitter();
     this.user = storage.getUser();
 
+    var self = this;
+
     function request(method, params) {
         var fetchOptions = {
             method: 'POST',
@@ -42,76 +44,71 @@ function StremioAPI(options) {
     }
 
     function onUserUpdated(user) {
-        var currentUserId = this.user && this.user.id;
-        var currentUserLastModified = this.user && this.user.lastModified;
+        var currentUserId = self.user && self.user.id;
+        var currentUserLastModified = self.user && self.user.lastModified;
         var nextUserId = user && user.id;
         var nextUserLastModified = user && user.lastModified;
         if (currentUserId !== nextUserId || currentUserLastModified < nextUserLastModified) {
-            this.user = user;
+            self.user = user;
             storage.setUser(user);
-            this.events.emit('user');
+            self.events.emit('user');
         }
     }
 
     this.loginWithEmail = function(email, password) {
-        var self = this;
         return request('login', { email: email, password: password })
             .then(function(result) {
                 var user = result.user;
                 user.authKey = result.authKey;
-                onUserUpdated.call(self, user);
+                onUserUpdated(user);
             });
     };
 
     this.loginWithToken = function(token) {
-        var self = this;
         return request('login', { token: token })
             .then(function(result) {
                 var user = result.user;
                 user.authKey = result.authKey;
-                onUserUpdated.call(self, user);
+                onUserUpdated(user);
             });
     };
 
     this.register = function(email, password) {
-        var self = this;
         return request('register', { email: email, password: password })
             .then(function(result) {
                 var user = result.user;
                 user.authKey = result.authKey;
-                onUserUpdated.call(self, user);
+                onUserUpdated(user);
             });
     };
 
     this.logout = function() {
-        var self = this;
         var authKey = this.user && this.user.authKey;
         return request('logout', { authKey: authKey })
             .then(function() { })
             .catch(function() { })
             .then(function() {
-                onUserUpdated.call(self, null);
+                onUserUpdated(null);
             });
     };
 
     this.pullUser = function() {
-        var self = this;
         var authKey = this.user && this.user.authKey;
         return request('getUser', { authKey: authKey })
             .then(function(user) {
                 user.authKey = authKey;
-                onUserUpdated.call(self, user);
+                onUserUpdated(user);
             });
     };
 
     this.pushUser = function() {
-        var self = this;
         return new Promise(function(resolve, reject) {
             if (self.user === null) {
                 reject('cannot push null user');
                 return;
             }
 
+            // @TODO: document and think about this behaviour
             self.user.lastModified = Date.now();
             request('saveUser', self.user)
                 .then(function() { })
@@ -124,6 +121,7 @@ function StremioAPI(options) {
     };
 
     this.request = function(method, params) {
+        // @TODO: authKey
         return request(method, params);
     };
 
