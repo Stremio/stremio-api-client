@@ -1,9 +1,11 @@
 var EventEmitter = require('events');
 
-var ENDPOINT = 'https://api9.strem.io/rpc';
+var ENDPOINT = 'https://api.strem.io';
 
 function StremioAPI(options) {
+    var options = Object.assign({ endpoint: ENDPOINT }, options)
     var storage = options.storage;
+
     this.events = new EventEmitter();
     this.user = storage.getUser();
 
@@ -15,13 +17,13 @@ function StremioAPI(options) {
             headers: {
                 'content-type': 'application/json'
             },
-            body: JSON.stringify({ id: 1, method: method, params: [params], jsonrpc: '2.0' })
+            body: JSON.stringify(params)
         };
 
-        return fetch(ENDPOINT, fetchOptions)
+        return fetch(options.endpoint+'/api/'+method, fetchOptions)
             .then(function(resp) {
                 if (resp.status !== 200) {
-                    throw new Error('fetch failed with status code ' + resp.status);
+                    throw new Error('request failed with status code ' + resp.status);
                 }
 
                 if (resp.headers.get('content-type').indexOf('application/json') === -1) {
@@ -42,6 +44,11 @@ function StremioAPI(options) {
                 return body.result;
             });
     }
+
+    this.request = function(method, params) {
+        // @TODO: authKey
+        return request(method, params);
+    };
 
     function onUserUpdated(user) {
         var currentUserId = self.user && self.user.id;
@@ -109,11 +116,6 @@ function StremioAPI(options) {
                     resolve();
                 });
         });
-    };
-
-    this.request = function(method, params) {
-        // @TODO: authKey
-        return request(method, params);
     };
 
     Object.seal(this);
