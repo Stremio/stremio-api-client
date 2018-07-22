@@ -6,15 +6,20 @@ var memStorage = require('./lib/memStorage')
 var ENDPOINT = 'https://api.strem.io';
 
 function StremioAPI(options) {
+	var self = this;
+
 	var options = Object.assign({ endpoint: ENDPOINT, storage: memStorage() }, options)
 	var storage = options.storage;
 
 	this.events = new EventEmitter();
 	this.user = storage.getJSON('user');
 
-	var authKey = storage.getJSON('authKey')
-
-	var self = this;
+	// Migration from legacy format
+	if (this.user && this.user.authKey) {
+		storage.setJSON('authKey', this.user.authKey)
+		delete this.user.authKey
+		storage.setJSON('user', this.user)
+	}
 
 	function request(method, params) {
 		var fetchOptions = {
@@ -113,12 +118,13 @@ function StremioAPI(options) {
 			}
 
 			// @TODO: document and think about this behaviour
-			self.user.lastModified = Date.now();
+			self.user.lastModified = new Date()
+			storage.setJSON('user', self.user)
+			
 			request('saveUser', self.user)
 			.then(function() { })
 			.catch(function() { })
 			.then(function() {
-				onUserUpdated(self.user);
 				resolve();
 			});
 		});
