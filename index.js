@@ -123,6 +123,10 @@ function StremioAPI(options) {
         });
     };
 
+    this.request = function(method, params) {
+        return request(method, params);
+    };
+
     Object.seal(this);
     return this;
 }
