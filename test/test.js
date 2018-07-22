@@ -35,6 +35,16 @@ tape('register', function(t) {
 	})
 })
 
+tape('logout', function(t) {
+	api.logout()
+	.then(function() {
+		t.notOk(api.user, 'api.user should be empty')
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
+})
 
 tape('storage persists', function(t) {
 	var user = {
@@ -60,6 +70,12 @@ tape('storage persists', function(t) {
 	.then(function(resp) {
 		t.ok(resp.email, 'has resp.email')
 		t.deepEquals(resp, API.user, 'resp.user is same as API.user')
+
+		return API.logout()
+	})
+	.then(function() {
+		t.notOk(API.user, 'API.user is empty')
+		t.notOk(store.getJSON('authKey'), 'storage does not have authKey')
 		t.end()
 	})
 	.catch(function(err) {
