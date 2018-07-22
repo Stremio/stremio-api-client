@@ -111,24 +111,25 @@ function StremioAPI(options) {
 		});
 	};
 
-	this.pushUser = function() {
-		return new Promise(function(resolve, reject) {
-			if (self.user === null) {
-				reject('cannot push null user');
-				return;
-			}
+	this.getAddonCollection = function() {
+		return self.requestWithAuth('addonCollectionGet', { update: true })
+		.then(function(res) {
 
-			// @TODO: document and think about this behaviour
-			self.user.lastModified = new Date()
-			storage.setJSON('user', self.user)
-			
-			request('saveUser', self.user)
-			.then(function() { })
-			.catch(function() { })
-			.then(function() {
-				resolve();
-			});
-		});
+		})
+	};
+
+	this.pushUser = function() {
+		if (!self.user) {
+			return new Promise(function(resolve, reject) {
+				reject('cannot push null user');
+			})
+		}
+		
+		// @TODO: document and think about this behaviour
+		self.user.lastModified = new Date()
+		storage.setJSON('user', self.user)
+		
+		return self.requestWithAuth('saveUser', self.user)
 	};
 
 	Object.seal(this);
