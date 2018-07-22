@@ -64,15 +64,6 @@ function StremioAPI(options) {
             });
     };
 
-    this.loginWithToken = function(token) {
-        return request('login', { token: token })
-            .then(function(result) {
-                var user = result.user;
-                user.authKey = result.authKey;
-                onUserUpdated(user);
-            });
-    };
-
     this.register = function(email, password) {
         return request('register', { email: email, password: password })
             .then(function(result) {
