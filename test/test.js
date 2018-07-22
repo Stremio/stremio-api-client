@@ -35,6 +35,17 @@ tape('register', function(t) {
 	})
 })
 
+tape('getAddonCollection', function(t) {
+	t.ok(api.addons, 'api.addons is there')
+
+	api.getAddonCollection()
+	.then(function(resp) {
+		t.ok(resp.isInitial, 'isInitial')
+		t.ok(api.addons, 'api.addons is there')
+		t.end()
+	})
+})
+
 tape('logout', function(t) {
 	api.logout()
 	.then(function() {

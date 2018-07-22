@@ -1,5 +1,7 @@
 var EventEmitter = require('events');
 var fetch = require('node-fetch')
+var AddonCollection = require('stremio-addon-client').AddonCollection;
+var defaultAddons = require('stremio-official-addons')
 
 var memStorage = require('./lib/memStorage')
 
@@ -13,6 +15,9 @@ function StremioAPI(options) {
 
 	this.events = new EventEmitter();
 	this.user = storage.getJSON('user');
+
+	this.addons = new AddonCollection();
+	this.addons.load(defaultAddons);
 
 	// Migration from legacy format
 	if (this.user && this.user.authKey) {
@@ -114,7 +119,11 @@ function StremioAPI(options) {
 	this.getAddonCollection = function() {
 		return self.requestWithAuth('addonCollectionGet', { update: true })
 		.then(function(res) {
-
+			// @TODO: much more sophisticated logic here
+			if (Array.isArray(res.addons) && res.addons.length) {
+				self.addons.load(res.addons);
+			}
+			return res
 		})
 	};
 
@@ -124,7 +133,7 @@ function StremioAPI(options) {
 				reject('cannot push null user');
 			})
 		}
-		
+
 		// @TODO: document and think about this behaviour
 		self.user.lastModified = new Date()
 		storage.setJSON('user', self.user)
