@@ -12,4 +12,9 @@ tape('basic version call', function(t) {
 	})
 })
 
+
 // @TODO: test legacy user record, whether login would be kept (by using a mock storage)
+
+// @TODO: test if persisting auth and etc.
+
+// @TODO: request vs requestWithAuth and etc.
