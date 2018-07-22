@@ -12,6 +12,8 @@ function StremioAPI(options) {
 	this.events = new EventEmitter();
 	this.user = storage.getJSON('user');
 
+	var authKey = storage.getJSON('authKey')
+
 	var self = this;
 
 	function request(method, params) {
@@ -69,7 +71,7 @@ function StremioAPI(options) {
 		return request('login', { email: email, password: password })
 			.then(function(result) {
 				var user = result.user;
-				user.authKey = result.authKey;
+				storage.setJSON('authKey', result.authKey)
 				onUserUpdated(user);
 			});
 	};
@@ -78,13 +80,13 @@ function StremioAPI(options) {
 		return request('register', { email: email, password: password })
 			.then(function(result) {
 				var user = result.user;
-				user.authKey = result.authKey;
+				storage.setJSON('authKey', result.authKey)
 				onUserUpdated(user);
 			});
 	};
 
 	this.logout = function() {
-		var authKey = this.user && this.user.authKey;
+		var authKey = storage.getJSON('authKey');
 		return request('logout', { authKey: authKey })
 			.then(function() { })
 			.catch(function() { })
@@ -94,10 +96,9 @@ function StremioAPI(options) {
 	};
 
 	this.pullUser = function() {
-		var authKey = this.user && this.user.authKey;
+		var authKey = storage.getJSON('authKey');
 		return request('getUser', { authKey: authKey })
 			.then(function(user) {
-				user.authKey = authKey;
 				onUserUpdated(user);
 			});
 	};

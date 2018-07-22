@@ -11,3 +11,5 @@ tape('basic version call', function(t) {
 		t.end()
 	})
 })
+
+// @TODO: test legacy user record, whether login would be kept (by using a mock storage)
