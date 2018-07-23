@@ -5,6 +5,7 @@ var MemoryStorage = require('./lib/memoryStorage');
 var ApiClient = require('./apiClient');
 
 var ENDPOINT = 'https://api.strem.io';
+var INTERRUPTED_ERROR_MESSAGE = 'request interrupted';
 
 function ApiStore(options) {
     var endpoint = options.endpoint || ENDPOINT;
@@ -14,7 +15,8 @@ function ApiStore(options) {
 
     this.events = new EventEmitter();
     this.user = storage.getJSON('user');
-    this.addons = new AddonCollection(officialAddons);
+    this.addons = new AddonCollection();
+    this.addons.load(storage.getJSON('addons') || officialAddons);
 
     this.request = function(method, params) {
         var currentClient = client;
@@ -22,7 +24,7 @@ function ApiStore(options) {
             currentClient.request(method, params)
                 .then(function(resp) {
                     if (currentClient !== client) {
-                        reject(new Error('request interrupted'));
+                        reject(new Error(INTERRUPTED_ERROR_MESSAGE));
                         return;
                     }
 
@@ -30,7 +32,7 @@ function ApiStore(options) {
                 })
                 .catch(function(err) {
                     if (currentClient !== client) {
-                        reject(new Error('request interrupted'));
+                        reject(new Error(INTERRUPTED_ERROR_MESSAGE));
                         return;
                     }
 
@@ -56,6 +58,24 @@ function ApiStore(options) {
                 storage.setJSON('user', result.user);
                 client = new ApiClient(endpoint, result.authKey);
                 self.user = result.user;
+            });
+    };
+
+    this.logout = function() {
+        return this.request('logout')
+            .then(function() {
+                storage.setJSON('authKey', null);
+                storage.setJSON('user', null);
+                client = new ApiClient(endpoint, null);
+                self.user = null;
+            })
+            .catch(function(err) {
+                if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
+                    storage.setJSON('authKey', null);
+                    storage.setJSON('user', null);
+                    client = new ApiClient(endpoint, null);
+                    self.user = null;
+                }
             });
     };
 };
