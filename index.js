@@ -3,146 +3,146 @@ var fetch = require('node-fetch')
 var AddonCollection = require('stremio-addon-client').AddonCollection;
 var defaultAddons = require('stremio-official-addons')
 
-var memStorage = require('./lib/memStorage')
+var MemoryStorage = require('./lib/memoryStorage');
 
 var ENDPOINT = 'https://api.strem.io';
 
 function StremioAPI(options) {
-	var self = this;
+    var self = this;
 
-	var options = Object.assign({ endpoint: ENDPOINT, storage: memStorage() }, options)
-	var storage = options.storage;
+    var options = Object.assign({ endpoint: ENDPOINT, storage: new MemoryStorage() }, options)
+    var storage = options.storage;
 
-	this.events = new EventEmitter();
-	this.user = storage.getJSON('user');
+    this.events = new EventEmitter();
+    this.user = storage.getJSON('user');
 
-	this.addons = new AddonCollection();
-	this.addons.load(defaultAddons);
+    this.addons = new AddonCollection();
+    this.addons.load(defaultAddons);
 
-	// Migration from legacy format
-	if (this.user && this.user.authKey) {
-		storage.setJSON('authKey', this.user.authKey)
-		delete this.user.authKey
-		storage.setJSON('user', this.user)
-	}
+    // Migration from legacy format
+    if (this.user && this.user.authKey) {
+        storage.setJSON('authKey', this.user.authKey)
+        delete this.user.authKey
+        storage.setJSON('user', this.user)
+    }
 
-	function request(method, params) {
-		var fetchOptions = {
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json'
-			},
-			body: JSON.stringify(params)
-		};
+    function request(method, params) {
+        var fetchOptions = {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        };
 
-		return fetch(options.endpoint+'/api/'+method, fetchOptions)
-		.then(function(resp) {
-			if (resp.status !== 200) {
-				throw new Error('request failed with status code ' + resp.status);
-			}
+        return fetch(options.endpoint + '/api/' + method, fetchOptions)
+            .then(function(resp) {
+                if (resp.status !== 200) {
+                    throw new Error('request failed with status code ' + resp.status);
+                }
 
-			if (resp.headers.get('content-type').indexOf('application/json') === -1) {
-				throw new Error('response type is not JSON');
-			}
+                if (resp.headers.get('content-type').indexOf('application/json') === -1) {
+                    throw new Error('response type is not JSON');
+                }
 
-			return resp.json();
-		})
-		.then(function(body) {
-			if (body.error) {
-				throw body.error;
-			}
+                return resp.json();
+            })
+            .then(function(body) {
+                if (body.error) {
+                    throw body.error;
+                }
 
-			if (!body.result) {
-				throw new Error('response has no result');
-			}
+                if (!body.result) {
+                    throw new Error('response has no result');
+                }
 
-			return body.result;
-		});
-	}
+                return body.result;
+            });
+    }
 
-	function onUserUpdated(user) {
-		var currentUserId = self.user && self.user.id;
-		var currentUserLastModified = self.user && self.user.lastModified;
-		var nextUserId = user && user.id;
-		var nextUserLastModified = user && user.lastModified;
-		if (currentUserId !== nextUserId || currentUserLastModified < nextUserLastModified) {
-			self.user = user;
-			storage.setJSON('user', user);
-			self.events.emit('user');
-		}
-	}
+    function onUserUpdated(user) {
+        var currentUserId = self.user && self.user.id;
+        var currentUserLastModified = self.user && self.user.lastModified;
+        var nextUserId = user && user.id;
+        var nextUserLastModified = user && user.lastModified;
+        if (currentUserId !== nextUserId || currentUserLastModified < nextUserLastModified) {
+            self.user = user;
+            storage.setJSON('user', user);
+            self.events.emit('user');
+        }
+    }
 
-	this.request = function(method, params) {
-		return request(method, params);
-	};
+    this.request = function(method, params) {
+        return request(method, params);
+    };
 
-	this.requestWithAuth = function(method, params) {
-		return request(method, Object.assign({ authKey: storage.getJSON('authKey') }, params))
-	};
+    this.requestWithAuth = function(method, params) {
+        return request(method, Object.assign({ authKey: storage.getJSON('authKey') }, params))
+    };
 
-	this.loginWithEmail = function(email, password) {
-		return request('login', { email: email, password: password })
-		.then(function(result) {
-			var user = result.user;
-			storage.setJSON('authKey', result.authKey)
-			onUserUpdated(user);
-		});
-	};
+    this.loginWithEmail = function(email, password) {
+        return request('login', { email: email, password: password })
+            .then(function(result) {
+                var user = result.user;
+                storage.setJSON('authKey', result.authKey)
+                onUserUpdated(user);
+            });
+    };
 
-	this.register = function(email, password) {
-		return request('register', { email: email, password: password })
-		.then(function(result) {
-			var user = result.user;
-			storage.setJSON('authKey', result.authKey)
-			onUserUpdated(user);
-		});
-	};
+    this.register = function(email, password) {
+        return request('register', { email: email, password: password })
+            .then(function(result) {
+                var user = result.user;
+                storage.setJSON('authKey', result.authKey)
+                onUserUpdated(user);
+            });
+    };
 
-	this.logout = function() {
-		return self.requestWithAuth('logout')
-		.then(function() { })
-		.catch(function() { })
-		.then(function() {
-			storage.setJSON('authKey', null);
-			onUserUpdated(null);
-		});
-	};
+    this.logout = function() {
+        return self.requestWithAuth('logout')
+            .then(function() { })
+            .catch(function() { })
+            .then(function() {
+                storage.setJSON('authKey', null);
+                onUserUpdated(null);
+            });
+    };
 
-	this.pullUser = function() {
-		return self.requestWithAuth('getUser')
-		.then(function(user) {
-			// @TODO: replace this function
-			onUserUpdated(user);
-		});
-	};
+    this.pullUser = function() {
+        return self.requestWithAuth('getUser')
+            .then(function(user) {
+                // @TODO: replace this function
+                onUserUpdated(user);
+            });
+    };
 
-	this.getAddonCollection = function() {
-		return self.requestWithAuth('addonCollectionGet', { update: true })
-		.then(function(res) {
-			// @TODO: much more sophisticated logic here
-			if (Array.isArray(res.addons) && res.addons.length) {
-				self.addons.load(res.addons);
-			}
-			return res
-		})
-	};
+    this.getAddonCollection = function() {
+        return self.requestWithAuth('addonCollectionGet', { update: true })
+            .then(function(res) {
+                // @TODO: much more sophisticated logic here
+                if (Array.isArray(res.addons) && res.addons.length) {
+                    self.addons.load(res.addons);
+                }
+                return res
+            })
+    };
 
-	this.pushUser = function() {
-		if (!self.user) {
-			return new Promise(function(resolve, reject) {
-				reject('cannot push null user');
-			})
-		}
+    this.pushUser = function() {
+        if (!self.user) {
+            return new Promise(function(resolve, reject) {
+                reject('cannot push null user');
+            })
+        }
 
-		// @TODO: document and think about this behaviour
-		self.user.lastModified = new Date()
-		storage.setJSON('user', self.user)
-		
-		return self.requestWithAuth('saveUser', self.user)
-	};
+        // @TODO: document and think about this behaviour
+        self.user.lastModified = new Date()
+        storage.setJSON('user', self.user)
 
-	Object.seal(this);
-	return this;
+        return self.requestWithAuth('saveUser', self.user)
+    };
+
+    Object.seal(this);
+    return this;
 }
 
 module.exports = StremioAPI;

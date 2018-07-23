@@ -1,6 +1,6 @@
 var StremioAPI = require('..')
 var tape = require('tape')
-var memStorage = require('../lib/memStorage')
+var MemoryStorage = require('../lib/memoryStorage')
 
 var api = new StremioAPI()
 
@@ -63,7 +63,7 @@ tape('storage persists', function(t) {
 		password: '215552'+Date.now(),
 	}
 
-	var store = new memStorage()
+	var store = new MemoryStorage()
 	var API = new StremioAPI({ storage: store })
 	API.register(user.email, user.password)
 	.then(function(resp) {
