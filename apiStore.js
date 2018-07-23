@@ -65,6 +65,7 @@ function ApiStore(options) {
         return this.request('login', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
+                addonsChange(null);
             });
     };
 
@@ -72,6 +73,7 @@ function ApiStore(options) {
         return this.request('register', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
+                addonsChange(null);
             });
     };
 
