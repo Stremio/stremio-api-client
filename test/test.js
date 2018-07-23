@@ -1,8 +1,10 @@
-var StremioAPI = require('..')
+var StremioAPIStore = require('..').StremioAPIStore
 var tape = require('tape')
-var memStorage = require('../lib/memStorage')
+var MemoryStorage = require('../lib/memoryStorage')
 
-var api = new StremioAPI()
+var api = new StremioAPIStore()
+
+// @TODO: test StremioAPIClient too
 
 tape('basic call', function(t) {
 	api.request('addonCollectionGet', {})
@@ -35,6 +37,7 @@ tape('register', function(t) {
 	})
 })
 
+/*
 tape('getAddonCollection', function(t) {
 	t.ok(api.addons, 'api.addons is there')
 
@@ -45,6 +48,7 @@ tape('getAddonCollection', function(t) {
 		t.end()
 	})
 })
+*/
 
 tape('logout', function(t) {
 	api.logout()
@@ -63,8 +67,8 @@ tape('storage persists', function(t) {
 		password: '215552'+Date.now(),
 	}
 
-	var store = new memStorage()
-	var API = new StremioAPI({ storage: store })
+	var store = new MemoryStorage()
+	var API = new StremioAPIStore({ storage: store })
 	API.register(user.email, user.password)
 	.then(function(resp) {
 		t.ok(API.user, 'API.user')
@@ -72,11 +76,11 @@ tape('storage persists', function(t) {
 
 		t.ok(store.getJSON('authKey'), 'storage has saved authKey')
 
-		var API2 = new StremioAPI({ storage: store })
+		var API2 = new StremioAPIStore({ storage: store })
 		t.ok(API2.user, 'API2.user')
 		t.deepEquals(API.user, API2.user, 'API.user is the same as API2.user')
 
-		return API2.requestWithAuth('getUser')
+		return API2.request('getUser')
 	})
 	.then(function(resp) {
 		t.ok(resp.email, 'has resp.email')
