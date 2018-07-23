@@ -37,23 +37,35 @@ tape('register', function(t) {
 	})
 })
 
-/*
-tape('getAddonCollection', function(t) {
+tape('API.addons is initialized by default', function(t) {
 	t.ok(api.addons, 'api.addons is there')
+	t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
+	t.end()
+})
 
-	api.getAddonCollection()
+// @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
+tape('syncAddonCollection', function(t) {
+	api.syncAddonCollection()
 	.then(function(resp) {
-		t.ok(resp.isInitial, 'isInitial')
+		// @TODO: what's said in the prev comment
 		t.ok(api.addons, 'api.addons is there')
+		t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
 		t.end()
 	})
+	.catch(function(err) {
+		t.error(err)
+	})
 })
-*/
+
+// @TODO: syncUser
 
 tape('logout', function(t) {
 	api.logout()
 	.then(function() {
 		t.notOk(api.user, 'api.user should be empty')
+		// @TODO: test if storage authKey is reset
+		// @TODO: test if storage addons is reset
+		// @TODO: test if API.addons has been reset to official
 		t.end()
 	})
 	.catch(function(err) {
@@ -86,6 +98,8 @@ tape('storage persists', function(t) {
 		t.ok(resp.email, 'has resp.email')
 		t.deepEquals(resp, API.user, 'resp.user is same as API.user')
 
+		// @TODO: API.addons is initialized by default, same as API1's add-ons
+
 		return API.logout()
 	})
 	.then(function() {
@@ -100,7 +114,3 @@ tape('storage persists', function(t) {
 
 
 // @TODO: test legacy user record, whether login would be kept (by using a mock storage)
-
-// @TODO: test if persisting auth and etc.
-
-// @TODO: request vs requestWithAuth and etc.

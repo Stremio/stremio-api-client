@@ -47,7 +47,7 @@ function ApiStore(options) {
             .then(function(result) {
                 storage.setJSON('authKey', result.authKey);
                 storage.setJSON('user', result.user);
-                client = new ApiClient(endpoint, result.authKey);
+                client = new ApiClient({ endpoint: endpoint, authKey: result.authKey });
                 self.user = result.user;
             });
     };
@@ -57,7 +57,7 @@ function ApiStore(options) {
             .then(function(result) {
                 storage.setJSON('authKey', result.authKey);
                 storage.setJSON('user', result.user);
-                client = new ApiClient(endpoint, result.authKey);
+                client = new ApiClient({ endpoint: endpoint, authKey: result.authKey });
                 self.user = result.user;
             });
     };
@@ -67,18 +67,34 @@ function ApiStore(options) {
             .then(function() {
                 storage.setJSON('authKey', null);
                 storage.setJSON('user', null);
-                client = new ApiClient(endpoint, null);
+                client = new ApiClient({ endpoint: endpoint, authKey: null });
                 self.user = null;
+
+                storage.setJSON('addons', null);
+                self.addons.load(officialAddons);
             })
             .catch(function(err) {
                 if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
                     storage.setJSON('authKey', null);
                     storage.setJSON('user', null);
-                    client = new ApiClient(endpoint, null);
+                    client = new ApiClient({ endpoint: endpoint, authKey: nuly });
                     self.user = null;
+
+                    storage.setJSON('addons', null);
+                    self.addons.load(officialAddons);
                 }
             });
     };
+
+    this.syncAddonCollection = function() {
+        return this.request('addonCollectionGet')
+            .then(function(resp) {
+                if (!resp.addons) throw 'no resp.addons';
+
+                storage.setJSON('addons', resp.addons);
+                self.addons.load(resp.addons)
+            })
+    }
 };
 
 module.exports = ApiStore;
