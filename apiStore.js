@@ -16,8 +16,23 @@ function ApiStore(options) {
 
     this.events = new EventEmitter();
     this.user = storage.getJSON('user');
+
     this.addons = new AddonCollection();
     this.addons.load(storage.getJSON('addons') || officialAddons);
+
+    // only invoked when the user is certainly changed
+    // call this with (null, nill) when logging out
+    function userChange(authKey, user) {
+        storage.setJSON('authKey', authKey);
+        storage.setJSON('user', user);
+        client = new ApiClient({ endpoint: endpoint, authKey: authKey });
+        self.user = user;
+    }
+
+    function addonsChange(descriptors) {
+        storage.setJSON('addons', descriptors);
+        self.addons.load(descriptors || officialAddons);
+    }
 
     this.request = function(method, params) {
         var currentClient = client;
@@ -45,43 +60,27 @@ function ApiStore(options) {
     this.loginWithEmail = function(email, password) {
         return this.request('login', { email: email, password: password })
             .then(function(result) {
-                storage.setJSON('authKey', result.authKey);
-                storage.setJSON('user', result.user);
-                client = new ApiClient({ endpoint: endpoint, authKey: result.authKey });
-                self.user = result.user;
+                userChange(result.authKey, result.user);
             });
     };
 
     this.register = function(email, password) {
         return this.request('register', { email: email, password: password })
             .then(function(result) {
-                storage.setJSON('authKey', result.authKey);
-                storage.setJSON('user', result.user);
-                client = new ApiClient({ endpoint: endpoint, authKey: result.authKey });
-                self.user = result.user;
+                userChange(result.authKey, result.user);
             });
     };
 
     this.logout = function() {
         return this.request('logout')
             .then(function() {
-                storage.setJSON('authKey', null);
-                storage.setJSON('user', null);
-                client = new ApiClient({ endpoint: endpoint, authKey: null });
-                self.user = null;
-
-                storage.setJSON('addons', null);
-                self.addons.load(officialAddons);
+                userChange(null, null);
+                addonsChange(null);
             })
             .catch(function(err) {
                 if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
-                    storage.setJSON('authKey', null);
-                    storage.setJSON('user', null);
-                    client = new ApiClient({ endpoint: endpoint, authKey: nuly });
-                    self.user = null;
-
-                    storage.setJSON('addons', null);
-                    self.addons.load(officialAddons);
+                    userChange(null, null);
+                    addonsChange(null);
                 }
             });
     };
@@ -90,9 +89,7 @@ function ApiStore(options) {
         return this.request('addonCollectionGet')
             .then(function(resp) {
                 if (!resp.addons) throw 'no resp.addons';
-
-                storage.setJSON('addons', resp.addons);
-                self.addons.load(resp.addons)
+                addonsChange(resp.addons);
             })
     }
 };

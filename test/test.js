@@ -6,6 +6,8 @@ var api = new StremioAPIStore()
 
 // @TODO: test StremioAPIClient too
 
+// @TODO: test events
+
 tape('basic call', function(t) {
 	api.request('addonCollectionGet', {})
 	.then(function(resp) {
@@ -19,6 +21,11 @@ tape('basic call', function(t) {
 	})
 })
 
+tape('API.addons is initialized by default', function(t) {
+	t.ok(api.addons, 'api.addons is there')
+	t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
+	t.end()
+})
 
 var user = {
 	email: 'stremioapiclient+'+Date.now()+'@strem.io',
@@ -35,12 +42,6 @@ tape('register', function(t) {
 	.catch(function(err) {
 		t.error(err)
 	})
-})
-
-tape('API.addons is initialized by default', function(t) {
-	t.ok(api.addons, 'api.addons is there')
-	t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
-	t.end()
 })
 
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
