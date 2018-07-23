@@ -74,6 +74,9 @@ tape('logout', function(t) {
 	})
 })
 
+// @TODO: from a logged in state, log in again with another account
+// @TODO: check if add-ons is reset !!
+
 tape('storage persists', function(t) {
 	var user = {
 		email: 'stremioapiclient2+'+Date.now()+'@strem.io',

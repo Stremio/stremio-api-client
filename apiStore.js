@@ -12,9 +12,11 @@ function ApiStore(options) {
     var endpoint = options.endpoint || ENDPOINT;
     var storage = options.storage || new MemoryStorage();
     var client = new ApiClient({ endpoint: endpoint, authKey: storage.getJSON('authKey') });
+    
     var self = this;
 
     this.events = new EventEmitter();
+
     this.user = storage.getJSON('user');
 
     this.addons = new AddonCollection();
@@ -27,11 +29,13 @@ function ApiStore(options) {
         storage.setJSON('user', user);
         client = new ApiClient({ endpoint: endpoint, authKey: authKey });
         self.user = user;
+        self.events.emit('user-change', user);
     }
 
     function addonsChange(descriptors) {
         storage.setJSON('addons', descriptors);
         self.addons.load(descriptors || officialAddons);
+        self.events.emit('addons-change');
     }
 
     this.request = function(method, params) {
