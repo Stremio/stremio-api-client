@@ -10,6 +10,7 @@ function ApiStore(options) {
     var endpoint = options.endpoint || ENDPOINT;
     var storage = options.storage || new MemoryStorage();
     var client = new ApiClient(endpoint, storage.getJSON('authKey'));
+    var self = this;
 
     this.events = new EventEmitter();
     this.user = storage.getJSON('user');
@@ -36,6 +37,16 @@ function ApiStore(options) {
                     reject(err);
                 });
         });
+    };
+
+    this.loginWithEmail = function(email, password) {
+        return this.request('login', { email: email, password: password })
+            .then(function(result) {
+                storage.setJSON('authKey', result.authKey);
+                storage.setJSON('user', result.user);
+                self.user = result.user;
+                client = new ApiClient(endpoint, result.authKey);
+            });
     };
 };
 
