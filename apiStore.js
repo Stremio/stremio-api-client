@@ -44,8 +44,18 @@ function ApiStore(options) {
             .then(function(result) {
                 storage.setJSON('authKey', result.authKey);
                 storage.setJSON('user', result.user);
-                self.user = result.user;
                 client = new ApiClient(endpoint, result.authKey);
+                self.user = result.user;
+            });
+    };
+
+    this.register = function(email, password) {
+        return this.request('register', { email: email, password: password })
+            .then(function(result) {
+                storage.setJSON('authKey', result.authKey);
+                storage.setJSON('user', result.user);
+                client = new ApiClient(endpoint, result.authKey);
+                self.user = result.user;
             });
     };
 };
