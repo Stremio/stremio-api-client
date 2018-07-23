@@ -1,13 +1,18 @@
 var fetch = require('node-fetch');
 
-function ApiClient(endpoint, authKey) {
+function ApiClient(options) {
+    options = options || {}
+
+    var authKey = options.authKey
+    var endpoint = options.endpoint
+
     this.request = function(method, params) {
         var fetchOptions = {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
             },
-            body: Object.assign({ authKey: authKey }, JSON.stringify(params))
+            body: JSON.stringify(Object.assign({ authKey: authKey }, params))
         };
 
         return fetch(endpoint + '/api/' + method, fetchOptions)

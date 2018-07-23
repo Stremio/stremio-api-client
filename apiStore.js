@@ -8,9 +8,10 @@ var ENDPOINT = 'https://api.strem.io';
 var INTERRUPTED_ERROR_MESSAGE = 'request interrupted';
 
 function ApiStore(options) {
+    options = options || {}
     var endpoint = options.endpoint || ENDPOINT;
     var storage = options.storage || new MemoryStorage();
-    var client = new ApiClient(endpoint, storage.getJSON('authKey'));
+    var client = new ApiClient({ endpoint: endpoint, authKey: storage.getJSON('authKey') });
     var self = this;
 
     this.events = new EventEmitter();
