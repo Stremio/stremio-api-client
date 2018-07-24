@@ -1,5 +1,6 @@
 var EventEmitter = require('events');
 var AddonCollection = require('stremio-addon-client').AddonCollection;
+var mapURL = require('stremio-addon-client').mapURL;
 var officialAddons = require('stremio-official-addons');
 var MemoryStorage = require('./lib/memoryStorage');
 var ApiClient = require('./apiClient');
@@ -21,23 +22,6 @@ function ApiStore(options) {
 
     this.addons = new AddonCollection();
     this.addons.load(storage.getJSON('addons') || officialAddons);
-
-    // only invoked when the user is certainly changed
-    // call this with (null, nill) when logging out
-    function userChange(authKey, user) {
-        storage.setJSON('authKey', authKey);
-        storage.setJSON('user', user);
-        client = new ApiClient({ endpoint: endpoint, authKey: authKey });
-        self.user = user;
-        self.events.emit('user-change', user);
-    }
-
-    function addonsChange(descriptors, lastModified) {
-        storage.setJSON('addons', descriptors);
-        storage.setJSON('addonsLastModified', lastModified);
-        self.addons.load(descriptors || officialAddons);
-        self.events.emit('addons-change');
-    }
 
     this.request = function(method, params) {
         var currentClient = client;
@@ -92,9 +76,13 @@ function ApiStore(options) {
             });
     };
 
-    this.syncAddonCollection = function() {
-        var params = { update: true, addFromURL: [] }
-        var lastModified = storage.getJSON('addonsLastModified') || 0
+    // @TODO: this should work only if there is self.user + tests
+    this.pullAddonCollection = function() {
+        var params = { update: true, addFromURL: [] };
+        var lastModified = storage.getJSON('addonsLastModified') || 0;
+
+        var legacyKey = 'addons:'+self.user._id;
+        params.addFromURL = mapLegacyAddonRepo(storage.getJSON(legacyKey));
 
         return this.request('addonCollectionGet', params)
             .then(function(resp) {
@@ -102,11 +90,51 @@ function ApiStore(options) {
                     throw 'no resp.addons';
                 }
 
-                var newLastModified = new Date(resp.lastModified).getTime()
+                var newLastModified = new Date(resp.lastModified).getTime();
                 if (resp.addons.length && newLastModified > lastModified) {
                     addonsChange(resp.addons, newLastModified);
+
+                    if (params.addFromURL.length) {
+                        storage.setJSON(legacyKey, null);
+                    }
                 }
             })
+    };
+
+    this.pushAddonCollection = function() {
+        var params = {}
+        // @TODO, addonCollectionSet
+    };
+
+    //
+    // Private methods
+    //
+
+    // only invoked when the user is certainly changed
+    // call this with (null, null) when logging out
+    function userChange(authKey, user) {
+        storage.setJSON('authKey', authKey);
+        storage.setJSON('user', user);
+        client = new ApiClient({ endpoint: endpoint, authKey: authKey });
+        self.user = user;
+        self.events.emit('user-change', user);
+    }
+
+    function addonsChange(descriptors, lastModified) {
+        storage.setJSON('addons', descriptors);
+        storage.setJSON('addonsLastModified', lastModified || 0);
+        self.addons.load(descriptors || officialAddons);
+        self.events.emit('addons-change');
+    }
+
+    // remaps old add-on format into a list of URLs
+    function mapLegacyAddonRepo(repo) {
+        if (repo && Array.isArray(repo.addons)) {
+            return repo.addons
+            .filter(function(x) { return Array.isArray(x.endpoints) && typeof(x.endpoints[0]) === 'string' })
+            .map(function(x) { return mapURL(x.endpoints[0]) })
+        }
+        return []
     }
 };
 

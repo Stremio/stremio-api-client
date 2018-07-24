@@ -45,8 +45,8 @@ tape('register', function(t) {
 })
 
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
-tape('syncAddonCollection', function(t) {
-	api.syncAddonCollection()
+tape('pullAddonCollection', function(t) {
+	api.pullAddonCollection()
 	.then(function(resp) {
 		// @TODO: what's said in the prev comment
 		t.ok(api.addons, 'api.addons is there')
