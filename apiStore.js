@@ -102,9 +102,10 @@ function ApiStore(options) {
     };
 
     this.pushAddonCollection = function() {
-        var params = {}
+        var params = { addons: self.addons.save() }
         // @TODO, addonCollectionSet
     };
+
 
     //
     // Private methods
@@ -136,6 +137,9 @@ function ApiStore(options) {
         }
         return []
     }
+
+    Object.seal(this);
+    return this;
 };
 
 module.exports = ApiStore;
