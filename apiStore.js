@@ -32,8 +32,9 @@ function ApiStore(options) {
         self.events.emit('user-change', user);
     }
 
-    function addonsChange(descriptors) {
+    function addonsChange(descriptors, lastModified) {
         storage.setJSON('addons', descriptors);
+        storage.setJSON('addonsLastModified', lastModified);
         self.addons.load(descriptors || officialAddons);
         self.events.emit('addons-change');
     }
@@ -65,7 +66,7 @@ function ApiStore(options) {
         return this.request('login', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
-                addonsChange(null);
+                addonsChange(null, null);
             });
     };
 
@@ -73,7 +74,7 @@ function ApiStore(options) {
         return this.request('register', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
-                addonsChange(null);
+                addonsChange(null, null);
             });
     };
 
@@ -81,21 +82,30 @@ function ApiStore(options) {
         return this.request('logout')
             .then(function() {
                 userChange(null, null);
-                addonsChange(null);
+                addonsChange(null, null);
             })
             .catch(function(err) {
                 if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
                     userChange(null, null);
-                    addonsChange(null);
+                    addonsChange(null, null);
                 }
             });
     };
 
     this.syncAddonCollection = function() {
-        return this.request('addonCollectionGet')
+        var params = { update: true, addFromURL: [] }
+        var lastModified = storage.getJSON('addonsLastModified') || 0
+
+        return this.request('addonCollectionGet', params)
             .then(function(resp) {
-                if (!resp.addons) throw 'no resp.addons';
-                addonsChange(resp.addons);
+                if (!Array.isArray(resp.addons)) {
+                    throw 'no resp.addons';
+                }
+
+                var newLastModified = new Date(resp.lastModified).getTime()
+                if (resp.addons.length && newLastModified > lastModified) {
+                    addonsChange(resp.addons, newLastModified);
+                }
             })
     }
 };
