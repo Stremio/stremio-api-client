@@ -46,16 +46,16 @@ function ApiStore(options) {
         });
     };
 
-    this.loginWithEmail = function(email, password) {
-        return this.request('login', { email: email, password: password })
+    this.login = function(params) {
+        return this.request('login', params)
             .then(function(result) {
                 userChange(result.authKey, result.user);
                 addonsUpdated(null, null);
             });
     };
 
-    this.register = function(email, password) {
-        return this.request('register', { email: email, password: password })
+    this.register = function(params) {
+        return this.request('register', params)
             .then(function(result) {
                 userChange(result.authKey, result.user);
                 addonsUpdated(null, null);

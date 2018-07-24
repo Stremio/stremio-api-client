@@ -45,7 +45,7 @@ var user = {
 }
 
 tape('register', function(t) {
-	api.register(user.email, user.password)
+	api.register(user)
 	.then(function(resp) {
 		t.ok(api.user, 'api.user')
 		t.equals(api.user.email, user.email,  'user email is equal')
@@ -137,7 +137,7 @@ tape('storage persists', function(t) {
 
 	var store = new MemoryStorage()
 	var API = new StremioAPIStore({ storage: store })
-	API.register(user.email, user.password)
+	API.register(user)
 	.then(function(resp) {
 		t.ok(API.user, 'API.user')
 		t.equals(API.user.email, user.email,  'user email is equal')
