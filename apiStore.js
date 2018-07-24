@@ -81,7 +81,7 @@ function ApiStore(options) {
         var params = { update: true, addFromURL: [] };
         var lastModified = storage.getJSON('addonsLastModified') || 0;
 
-        var legacyKey = 'addons:'+self.user._id;
+        var legacyKey = 'addons:'+(self.user ? self.user._id : '');
         params.addFromURL = mapLegacyAddonRepo(storage.getJSON(legacyKey));
 
         return this.request('addonCollectionGet', params)
