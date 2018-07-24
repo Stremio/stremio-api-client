@@ -50,7 +50,7 @@ function ApiStore(options) {
         return this.request('login', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
-                addonsChange(null, null);
+                addonsUpdated(null, null);
             });
     };
 
@@ -58,7 +58,7 @@ function ApiStore(options) {
         return this.request('register', { email: email, password: password })
             .then(function(result) {
                 userChange(result.authKey, result.user);
-                addonsChange(null, null);
+                addonsUpdated(null, null);
             });
     };
 
@@ -66,16 +66,17 @@ function ApiStore(options) {
         return this.request('logout')
             .then(function() {
                 userChange(null, null);
-                addonsChange(null, null);
+                addonsUpdated(null, null);
             })
             .catch(function(err) {
                 if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
                     userChange(null, null);
-                    addonsChange(null, null);
+                    addonsUpdated(null, null);
                 }
             });
     };
 
+    // @TODO: the next 4 methods should ensure self.user
     // @TODO: this should work only if there is self.user + tests
     this.pullAddonCollection = function() {
         var params = { update: true, addFromURL: [] };
@@ -92,7 +93,7 @@ function ApiStore(options) {
 
                 var newLastModified = new Date(resp.lastModified).getTime();
                 if (resp.addons.length && newLastModified > lastModified) {
-                    addonsChange(resp.addons, newLastModified);
+                    addonsUpdated(resp.addons, newLastModified);
 
                     if (params.addFromURL.length) {
                         storage.setJSON(legacyKey, null);
@@ -103,15 +104,34 @@ function ApiStore(options) {
 
     this.pushAddonCollection = function() {
         var params = { addons: self.addons.save() }
+
+
+
         // @TODO, addonCollectionSet
     };
 
+    this.pullUser = function() {
+        // @TODO: enforce self.user
+        return this.request('getUser')
+            .then(function(user) {
+                if (!(user && user._id)) {
+                    throw 'invalid user returned'
+                }
+
+                var lastModified = new Date(self.user.lastModified).getTime()
+                var newLastModified = new Date(user.lastModified).getTime()
+                if (newLastModified > lastModified) {
+                    storage.setJSON('user', user);
+                    self.user = user;
+                }
+            })
+    };
 
     //
     // Private methods
     //
 
-    // only invoked when the user is certainly changed
+    // only invoked when the user is changed by _id (different user)
     // call this with (null, null) when logging out
     function userChange(authKey, user) {
         storage.setJSON('authKey', authKey);
@@ -121,7 +141,8 @@ function ApiStore(options) {
         self.events.emit('user-change', user);
     }
 
-    function addonsChange(descriptors, lastModified) {
+    // this may be invoked when the add-on set is updated
+    function addonsUpdated(descriptors, lastModified) {
         storage.setJSON('addons', descriptors);
         storage.setJSON('addonsLastModified', lastModified || 0);
         self.addons.load(descriptors || officialAddons);

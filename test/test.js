@@ -47,7 +47,7 @@ tape('register', function(t) {
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
 tape('pullAddonCollection', function(t) {
 	api.pullAddonCollection()
-	.then(function(resp) {
+	.then(function() {
 		// @TODO: what's said in the prev comment
 		t.ok(api.addons, 'api.addons is there')
 		t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
@@ -58,7 +58,19 @@ tape('pullAddonCollection', function(t) {
 	})
 })
 
-// @TODO: syncUser
+// @TODO: pullUser/pushUser
+
+tape('pullUser', function(t) {
+	api.pullUser()
+	.then(function() {
+		// @TODO: what's said in the prev comment
+		t.ok(api.user, 'api.user is there')
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
+})
 
 tape('logout', function(t) {
 	api.logout()
