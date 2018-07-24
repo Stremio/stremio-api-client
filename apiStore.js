@@ -76,9 +76,14 @@ function ApiStore(options) {
             });
     };
 
-    // @TODO: the next 4 methods should ensure self.user
-    // @TODO: this should work only if there is self.user + tests
+    //
+    // pullAddonCollection, pushAddonCollection
+    //
     this.pullAddonCollection = function() {
+        if (!self.user) {
+            return noUserError();
+        }
+
         var params = { update: true, addFromURL: [] };
         var lastModified = storage.getJSON('addonsLastModified') || 0;
 
@@ -103,15 +108,24 @@ function ApiStore(options) {
     };
 
     this.pushAddonCollection = function() {
-        var params = { addons: self.addons.save() }
+        if (!self.user) {
+            return noUserError();
+        }
 
-
-
-        // @TODO, addonCollectionSet
+        var descriptors = self.addons.save();
+        storage.setJSON('addons', descriptors);
+        storage.setJSON('addonsLastModified', Date.now());
+        return self.request('addonCollectionSet', { addons: descriptors });
     };
 
+    //
+    // pullUser, pushUser
+    //
     this.pullUser = function() {
-        // @TODO: enforce self.user
+        if (!self.user) {
+            return noUserError();
+        }
+
         return this.request('getUser')
             .then(function(user) {
                 if (!(user && user._id)) {
@@ -125,6 +139,16 @@ function ApiStore(options) {
                     self.user = user;
                 }
             })
+    };
+
+    this.pushUser = function() {
+        if (!self.user) {
+            return noUserError();
+        }
+
+        self.user.lastModified = new Date();
+        storage.setJSON('user', self.user);
+        return self.request('saveUser', self.user);
     };
 
     //
@@ -157,6 +181,12 @@ function ApiStore(options) {
             .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
+    }
+
+    function noUserError() {
+        return new Promise(function(resolve, reject) {
+            reject(new Error('user required to invoke this'))
+        })
     }
 
     Object.seal(this);

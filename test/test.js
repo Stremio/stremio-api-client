@@ -27,6 +27,18 @@ tape('API.addons is initialized by default', function(t) {
 	t.end()
 })
 
+tape('pullUser does not work without api.user', function(t) {
+	api.pullUser()
+	.then(function() {
+		t.error('should not be here')
+	})
+	.catch(function(err) {
+		t.ok(err, 'has error')
+		t.equals(err.message, 'user required to invoke this')
+		t.end()
+	})
+});
+
 var user = {
 	email: 'stremioapiclient+'+Date.now()+'@strem.io',
 	password: '215552'+Date.now(),
@@ -44,6 +56,7 @@ tape('register', function(t) {
 	})
 })
 
+// @TODO: proper tests of pullAddonCollection, pushAddonCollection
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
 tape('pullAddonCollection', function(t) {
 	api.pullAddonCollection()
@@ -56,10 +69,24 @@ tape('pullAddonCollection', function(t) {
 	.catch(function(err) {
 		t.error(err)
 	})
+});
+
+tape('pushAddonCollection', function(t) {
+	api.pushAddonCollection()
+	.then(function() {
+		// @TODO: properly test if this works
+		t.ok(api.addons, 'api.addons is there')
+		t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
 })
 
-// @TODO: pullUser/pushUser
+// @TODO: pullUser/pushUser, proper tests
 
+// @TODO: finish this test
 tape('pullUser', function(t) {
 	api.pullUser()
 	.then(function() {
@@ -70,7 +97,20 @@ tape('pullUser', function(t) {
 	.catch(function(err) {
 		t.error(err)
 	})
+});
+
+tape('pushUser', function(t) {
+	api.pushUser()
+	.then(function() {
+		// @TODO: what's said in the prev comment
+		t.ok(api.user, 'api.user is there')
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
 })
+
 
 tape('logout', function(t) {
 	api.logout()
