@@ -170,3 +170,8 @@ tape('storage persists', function(t) {
 
 
 // @TODO: test legacy user record, whether login would be kept (by using a mock storage)
+/*
+tape('add-on collection persisted even without being logged in', function(t) {
+
+})
+*/
