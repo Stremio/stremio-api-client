@@ -4,7 +4,7 @@ function ApiClient(options) {
     options = options || {}
 
     var authKey = options.authKey
-    var endpoint = options.endpoint
+    var endpoint = options.endpoint || 'https://api.strem.io'
 
     this.request = function(method, params) {
         var fetchOptions = {
