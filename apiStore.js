@@ -8,6 +8,8 @@ var ApiClient = require('./apiClient');
 var ENDPOINT = 'https://api.strem.io';
 var INTERRUPTED_ERROR_MESSAGE = 'request interrupted';
 
+var USER_REQUIRED = 'user required to invoke this';
+
 function ApiStore(options) {
     options = options || {}
     var endpoint = options.endpoint || ENDPOINT;
@@ -81,7 +83,7 @@ function ApiStore(options) {
     //
     this.pullAddonCollection = function() {
         if (!self.user) {
-            return noUserError();
+            return Promise.reject(new Error(USER_REQUIRED));
         }
 
         var params = { update: true, addFromURL: [] };
@@ -109,7 +111,7 @@ function ApiStore(options) {
 
     this.pushAddonCollection = function() {
         if (!self.user) {
-            return noUserError();
+            return Promise.reject(new Error(USER_REQUIRED));
         }
 
         var descriptors = self.addons.save();
@@ -123,7 +125,7 @@ function ApiStore(options) {
     //
     this.pullUser = function() {
         if (!self.user) {
-            return noUserError();
+            return Promise.reject(new Error(USER_REQUIRED));
         }
 
         return this.request('getUser')
@@ -143,7 +145,7 @@ function ApiStore(options) {
 
     this.pushUser = function() {
         if (!self.user) {
-            return noUserError();
+            return Promise.reject(new Error(USER_REQUIRED));
         }
 
         self.user.lastModified = new Date();
@@ -181,12 +183,6 @@ function ApiStore(options) {
             .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
-    }
-
-    function noUserError() {
-        return new Promise(function(resolve, reject) {
-            reject(new Error('user required to invoke this'))
-        })
     }
 
     Object.seal(this);
