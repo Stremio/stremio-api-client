@@ -60,7 +60,7 @@ var APIStore = new StremioAPIStore(options)
 
 `APIStore.pushUser()`
 
-`APIStore.pullUser`
+`APIStore.pullUser()`
 
 `APIStore.pushAddonCollection()`
 
