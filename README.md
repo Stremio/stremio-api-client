@@ -17,9 +17,9 @@ var API = new StremioAPIClient(options)
 
 ### Options: 
 
-* `endpoint`: URL to the API, default is `https://api.strem.io`
+* `endpoint` - URL to the API, default is `https://api.strem.io`
 
-* `authKey`: session auth key, default is `null`
+* `authKey` - session auth key, default is `null`
 
 ### Methods:
 
@@ -31,11 +31,26 @@ var API = new StremioAPIClient(options)
 
 This is a stateful class that, when created, would take care of persistance and sync of the user and her add-ons collection
 
-It exposes:
+It's constructed like this:
+
+```javascript
+var StremioAPIStore = require('stremio-api-client').StremioAPIStore
+var APIStore = new StremioAPIStore(options)
+```
+
+### Options:
+
+* `endpoint` - URL to the API, default is `https://api.strem.io`
+
+* `storage` - a storage object with synchronous `getJSON` and `setJSON` properties
+
+### Properties:
 
 `APIStore.user` - User object
 
 `APIStore.addons` - AddonCollection
+
+### Methods:
 
 `APIStore.login()`
 
