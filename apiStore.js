@@ -18,6 +18,8 @@ function ApiStore(options) {
     
     var self = this;
 
+    this.endpoint = endpoint;
+
     this.events = new EventEmitter();
 
     this.user = storage.getJSON('user');

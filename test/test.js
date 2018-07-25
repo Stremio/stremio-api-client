@@ -9,6 +9,8 @@ var api = new StremioAPIStore()
 // @TODO: test events
 
 tape('basic call', function(t) {
+	t.ok(api.endpoint, 'has endpoint')
+
 	api.request('addonCollectionGet', {})
 	.then(function(resp) {
 		t.ok(resp, 'has response')
