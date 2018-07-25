@@ -41,6 +41,9 @@ function ApiClient(options) {
                 return body.result;
             });
     };
+
+    Object.freeze(this);
+    return this;
 }
 
 module.exports = ApiClient;
