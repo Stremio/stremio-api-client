@@ -110,13 +110,14 @@ function ApiStore(options) {
     };
 
     this.pushAddonCollection = function() {
-        if (!self.user) {
-            return Promise.reject(new Error(USER_REQUIRED));
-        }
-
         var descriptors = self.addons.save();
         storage.setJSON('addons', descriptors);
         storage.setJSON('addonsLastModified', Date.now());
+
+        if (!self.user) {
+            return Promise.resolve();
+        }
+
         return self.request('addonCollectionSet', { addons: descriptors });
     };
 
