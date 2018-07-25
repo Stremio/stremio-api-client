@@ -65,3 +65,9 @@ var APIStore = new StremioAPIStore(options)
 `APIStore.pushAddonCollection()`
 
 `APIStore.pullAddonCollection()`
+
+### Events:
+
+`user-change`: emitted when the User is changed (by ID, i.e. completely different user)
+
+`addons-change`: emitted when the add-on set (AddonCollection) is changed
