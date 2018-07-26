@@ -2,7 +2,10 @@ var StremioAPIStore = require('..').StremioAPIStore
 var tape = require('tape')
 var MemoryStorage = require('../lib/memoryStorage')
 
-var api = new StremioAPIStore()
+
+var defaultStore = new MemoryStorage()
+
+var api = new StremioAPIStore({ storage: defaultStore })
 
 // @TODO: test StremioAPIClient too
 
@@ -86,7 +89,7 @@ tape('pushAddonCollection', function(t) {
 	})
 })
 
-// @TODO: pullUser/pushUser, proper tests
+// @TODO: pullUser/pushUser proper tests
 
 // @TODO: finish this test
 tape('pullUser', function(t) {
@@ -114,19 +117,6 @@ tape('pushUser', function(t) {
 })
 
 
-tape('logout', function(t) {
-	api.logout()
-	.then(function() {
-		t.notOk(api.user, 'api.user should be empty')
-		// @TODO: test if storage authKey is reset
-		// @TODO: test if storage addons is reset
-		// @TODO: test if API.addons has been reset to official
-		t.end()
-	})
-	.catch(function(err) {
-		t.error(err)
-	})
-})
 
 // @TODO: from a logged in state, log in again with another account
 // @TODO: check if add-ons is reset !!
@@ -170,10 +160,44 @@ tape('storage persists', function(t) {
 	})
 })
 
+tape('migrationg legacy user works', function(t) {
+	var store = new MemoryStorage()
+	var copiedUser = Object.assign({ authKey: defaultStore.getJSON('authKey') }, defaultStore.getJSON('user'))
 
-// @TODO: test legacy user record, whether login would be kept (by using a mock storage)
+	store.setJSON('user', copiedUser)
+
+	var API = new StremioAPIStore({ storage: store })
+
+	t.ok(store.getJSON('authKey'), 'store has authKey')
+
+	API.pullUser()
+	.then(function() {
+		// @TODO: what's said in the prev comment
+		t.ok(api.user, 'api.user is there')
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
+})
+
 /*
 tape('add-on collection persisted even without being logged in', function(t) {
 
 })
 */
+
+
+tape('logout', function(t) {
+	api.logout()
+	.then(function() {
+		t.notOk(api.user, 'api.user should be empty')
+		// @TODO: test if storage authKey is reset
+		// @TODO: test if storage addons is reset
+		// @TODO: test if API.addons has been reset to official
+		t.end()
+	})
+	.catch(function(err) {
+		t.error(err)
+	})
+})
