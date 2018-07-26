@@ -179,10 +179,13 @@ function ApiStore(options) {
 
     // this may be invoked when the add-on set is updated
     function addonsUpdated(descriptors, lastModified) {
+        var isDifferent = addonsDifferent(descriptors || [], self.addons.getAddons())
+
         storage.setJSON('addons', descriptors);
         storage.setJSON('addonsLastModified', lastModified || 0);
         self.addons.load(descriptors || officialAddons);
         self.events.emit('addons-change');
+        if (isDifferent) self.events.emit('addons-different');
     }
 
     // remaps old add-on format into a list of URLs
@@ -193,6 +196,11 @@ function ApiStore(options) {
             .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
+    }
+
+    function addonsDifferent(a, b) {
+        if (a.length != b.length) return true
+        return a.some(function(x, i) { return b[i].transportUrl != x.transportUrl })
     }
 
     Object.seal(this);
