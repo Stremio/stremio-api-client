@@ -23,10 +23,6 @@ function ApiClient(options) {
                     throw new Error('request failed with status code ' + resp.status);
                 }
 
-                if (resp.headers.get('content-type').indexOf('application/json') === -1) {
-                    throw new Error('response type is not JSON');
-                }
-
                 return resp.json();
             })
             .then(function(body) {
