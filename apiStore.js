@@ -27,7 +27,6 @@ function ApiStore(options) {
     if (this.user && this.user.authKey) {
         storage.setJSON('authKey', this.user.authKey)
         client = new ApiClient({ endpoint: endpoint, authKey: this.user.authKey })
-        delete this.user.authKey
         storage.setJSON('user', this.user)
     }
 
