@@ -23,6 +23,13 @@ function ApiStore(options) {
     this.events = new EventEmitter();
 
     this.user = storage.getJSON('user');
+    // Migration from legacy format
+    if (this.user && this.user.authKey) {
+        storage.setJSON('authKey', this.user.authKey)
+        client = new ApiClient({ endpoint: endpoint, authKey: this.user.authKey })
+        delete this.user.authKey
+        storage.setJSON('user', this.user)
+    }
 
     this.addons = new AddonCollection();
     this.addons.load(storage.getJSON('addons') || officialAddons);
