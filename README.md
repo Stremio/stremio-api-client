@@ -52,22 +52,28 @@ var APIStore = new StremioAPIStore(options)
 
 ### Methods:
 
-`APIStore.login()`
+`APIStore.login({ email, password, fbLoginToken })` - logs in; `fbLoginToken` is optional
 
-`APIStore.register()`
+`APIStore.register({ email, password })` - registers a new user
 
-`APIStore.logout()`
+`APIStore.logout()` - logs out
 
-`APIStore.pushUser()`
+All of the above 3 methods change `API.user` and therefore will emit (upon success) `user-change`
 
-`APIStore.pullUser()`
+`APIStore.pushUser()` - pushes the local `API.user` to the API; requires to be logged in
 
-`APIStore.pushAddonCollection()`
+`APIStore.pullUser()` - pull the latest user from the API; requires to be logged in
 
-`APIStore.pullAddonCollection()`
+`pullUser()` may emit `user-change` if the remote user is more recent
+
+`APIStore.pushAddonCollection()` - pushes local `API.addons` collection to the API (via `addonCollectionSet`); requires to be logged in
+
+`APIStore.pullAddonCollection()` - pulls the remote add-on collection (via `addonCollectionGet`), may emit `addons-change` or `addons-different`
 
 ### Events:
 
 `user-change`: emitted when the User is changed (by ID, i.e. completely different user)
 
 `addons-change`: emitted when the add-on set (AddonCollection) is changed
+
+`addons-different`: emitted when the add-on collection is different (compared through transportUrls)
