@@ -52,6 +52,8 @@ var APIStore = new StremioAPIStore(options)
 
 ### Methods:
 
+**NOTE:** All the methods return promises
+
 `APIStore.login({ email, password, fbLoginToken })` - logs in; `fbLoginToken` is optional
 
 `APIStore.register({ email, password })` - registers a new user
