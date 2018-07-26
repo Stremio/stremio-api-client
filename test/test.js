@@ -9,7 +9,6 @@ var api = new StremioAPIStore({ storage: defaultStore })
 
 // @TODO: test StremioAPIClient too
 
-// @TODO: test events
 
 tape('basic call', function(t) {
 	t.ok(api.endpoint, 'has endpoint')
@@ -50,10 +49,14 @@ var user = {
 }
 
 tape('register', function(t) {
+	var userChangeEmitted = false
+
+	api.events.on('user-change', function(){ userChangeEmitted = true })
 	api.register(user)
 	.then(function(resp) {
 		t.ok(api.user, 'api.user')
 		t.equals(api.user.email, user.email,  'user email is equal')
+		t.ok(userChangeEmitted, 'user-change emitted')
 		t.end()
 	})
 	.catch(function(err) {
@@ -64,11 +67,19 @@ tape('register', function(t) {
 // @TODO: proper tests of pullAddonCollection, pushAddonCollection
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
 tape('pullAddonCollection', function(t) {
+	var addonsChangeEmitted = false
+	var addonsDifferentEmitted = false
+
+	api.events.on('addons-change', function() { addonsChangeEmitted = true })
+	api.events.on('addons-different', function() { addonsDifferentEmitted = true })
+
 	api.pullAddonCollection()
 	.then(function() {
 		// @TODO: what's said in the prev comment
 		t.ok(api.addons, 'api.addons is there')
 		t.ok(api.addons.getAddons().length > 0, 'api.addons.getAddons() has addons')
+		t.ok(addonsChangeEmitted, 'addons-change emitted')
+		t.notOk(addonsDifferentEmitted, 'addons-different not emitted')
 		t.end()
 	})
 	.catch(function(err) {
@@ -183,7 +194,7 @@ tape('migrationg legacy user works', function(t) {
 
 /*
 tape('add-on collection persisted even without being logged in', function(t) {
-
+// @TODO
 })
 */
 
