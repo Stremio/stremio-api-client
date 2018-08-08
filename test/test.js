@@ -1,3 +1,4 @@
+global.fetch = require('node-fetch')
 var StremioAPIStore = require('..').StremioAPIStore
 var tape = require('tape')
 var MemoryStorage = require('../lib/memoryStorage')
