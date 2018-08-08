@@ -1,11 +1,12 @@
 var StremioAPIStore = require('..').StremioAPIStore
+var fetch = require('node-fetch')
 var tape = require('tape')
 var MemoryStorage = require('../lib/memoryStorage')
 
 
 var defaultStore = new MemoryStorage()
 
-var api = new StremioAPIStore({ storage: defaultStore })
+var api = new StremioAPIStore({ storage: defaultStore, fetch: fetch })
 
 // @TODO: test StremioAPIClient too
 
@@ -139,7 +140,7 @@ tape('storage persists', function(t) {
 	}
 
 	var store = new MemoryStorage()
-	var API = new StremioAPIStore({ storage: store })
+	var API = new StremioAPIStore({ storage: store, fetch: fetch })
 	API.register(user)
 	.then(function(resp) {
 		t.ok(API.user, 'API.user')
@@ -147,7 +148,7 @@ tape('storage persists', function(t) {
 
 		t.ok(store.getJSON('authKey'), 'storage has saved authKey')
 
-		var API2 = new StremioAPIStore({ storage: store })
+		var API2 = new StremioAPIStore({ storage: store, fetch: fetch })
 		t.ok(API2.user, 'API2.user')
 		t.deepEquals(API.user, API2.user, 'API.user is the same as API2.user')
 
@@ -177,7 +178,7 @@ tape('migrationg legacy user works', function(t) {
 
 	store.setJSON('user', copiedUser)
 
-	var API = new StremioAPIStore({ storage: store })
+	var API = new StremioAPIStore({ storage: store, fetch: fetch })
 
 	t.ok(store.getJSON('authKey'), 'store has authKey')
 
