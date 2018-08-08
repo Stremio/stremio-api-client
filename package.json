@@ -13,11 +13,11 @@
     },
     "dependencies": {
         "events": "1.1.0",
-        "node-fetch": "2.2.0",
-        "stremio-addon-client": "^1.7.0",
+        "stremio-addon-client": "1.7.0",
         "stremio-official-addons": "1.1.2"
     },
     "devDependencies": {
+        "node-fetch": "2.2.0",
         "tape": "4.9.1"
     }
 }

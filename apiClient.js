@@ -1,5 +1,3 @@
-var fetch = require('node-fetch');
-
 function ApiClient(options) {
     options = options || {}
 
