@@ -12,9 +12,10 @@ var USER_REQUIRED = 'user required to invoke this';
 
 function ApiStore(options) {
     options = options || {}
+    var fetch = options.fetch
     var endpoint = options.endpoint || ENDPOINT;
     var storage = options.storage || new MemoryStorage();
-    var client = new ApiClient({ endpoint: endpoint, authKey: storage.getJSON('authKey') });
+    var client = new ApiClient({ endpoint: endpoint, fetch: fetch, authKey: storage.getJSON('authKey') });
     
     var self = this;
 
@@ -26,7 +27,7 @@ function ApiStore(options) {
     // Migration from legacy format
     if (this.user && this.user.authKey) {
         storage.setJSON('authKey', this.user.authKey)
-        client = new ApiClient({ endpoint: endpoint, authKey: this.user.authKey })
+        client = new ApiClient({ endpoint: endpoint, fetch: fetch, authKey: this.user.authKey })
         storage.setJSON('user', this.user)
     }
 
@@ -171,7 +172,7 @@ function ApiStore(options) {
     function userChange(authKey, user) {
         storage.setJSON('authKey', authKey);
         storage.setJSON('user', user);
-        client = new ApiClient({ endpoint: endpoint, authKey: authKey });
+        client = new ApiClient({ endpoint: endpoint, fetch: fetch, authKey: authKey });
         self.user = user;
         self.events.emit('user-change', user);
     }

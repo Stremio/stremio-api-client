@@ -1,8 +1,7 @@
-var fetch = require('node-fetch');
-
 function ApiClient(options) {
     options = options || {}
 
+    var fetch = options.fetch
     var authKey = options.authKey
     var endpoint = options.endpoint || 'https://api.strem.io'
 
