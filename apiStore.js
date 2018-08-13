@@ -15,7 +15,7 @@ function ApiStore(options) {
     var endpoint = options.endpoint || ENDPOINT;
     var storage = options.storage || new MemoryStorage();
     var client = new ApiClient({ endpoint: endpoint, authKey: storage.getJSON('authKey') });
-    
+
     var self = this;
 
     this.endpoint = endpoint;
@@ -79,10 +79,12 @@ function ApiStore(options) {
                 addonsUpdated(null, null);
             })
             .catch(function(err) {
-                if (err && err.message !== INTERRUPTED_ERROR_MESSAGE) {
-                    userChange(null, null);
-                    addonsUpdated(null, null);
+                if (err && err.message === INTERRUPTED_ERROR_MESSAGE) {
+                    throw err;
                 }
+
+                userChange(null, null);
+                addonsUpdated(null, null);
             });
     };
 
@@ -97,7 +99,7 @@ function ApiStore(options) {
         var params = { update: true, addFromURL: [] };
         var lastModified = storage.getJSON('addonsLastModified') || 0;
 
-        var legacyKey = 'addons:'+(self.user ? self.user._id : '');
+        var legacyKey = 'addons:' + (self.user ? self.user._id : '');
         params.addFromURL = mapLegacyAddonRepo(storage.getJSON(legacyKey));
 
         return this.request('addonCollectionGet', params)
@@ -191,8 +193,8 @@ function ApiStore(options) {
     function mapLegacyAddonRepo(repo) {
         if (repo && Array.isArray(repo.addons)) {
             return repo.addons
-            .filter(function(x) { return Array.isArray(x.endpoints) && typeof(x.endpoints[0]) === 'string' })
-            .map(function(x) { return mapURL(x.endpoints[0]) })
+                .filter(function(x) { return Array.isArray(x.endpoints) && typeof (x.endpoints[0]) === 'string' })
+                .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
     }
