@@ -201,7 +201,11 @@ function ApiStore(options) {
 
     function addonsDifferent(a, b) {
         if (a.length != b.length) return true
-        return a.some(function(x, i) { return b[i].transportUrl != x.transportUrl })
+        return a.some(function(aAddon) {
+            return b.every(function(bAddon) {
+                return aAddon.transportUrl !== bAddon.transportUrl
+            })
+        })
     }
 
     Object.seal(this);
