@@ -3,6 +3,7 @@ var AddonCollection = require('stremio-addon-client').AddonCollection;
 var mapURL = require('stremio-addon-client').mapURL;
 var officialAddons = require('stremio-official-addons');
 var MemoryStorage = require('./lib/memoryStorage');
+var addonsDifferent = require('./lib/addonsDifferent');
 var ApiClient = require('./apiClient');
 
 var ENDPOINT = 'https://api.strem.io';
@@ -197,11 +198,6 @@ function ApiStore(options) {
                 .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
-    }
-
-    function addonsDifferent(a, b) {
-        if (a.length != b.length) return true
-        return a.some(function(x, i) { return b[i].transportUrl != x.transportUrl })
     }
 
     Object.seal(this);
