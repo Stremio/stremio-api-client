@@ -3,6 +3,7 @@ var AddonCollection = require('stremio-addon-client').AddonCollection;
 var mapURL = require('stremio-addon-client').mapURL;
 var officialAddons = require('stremio-official-addons');
 var MemoryStorage = require('./lib/memoryStorage');
+var addonsDifferent = require('./lib/addonsDifferent');
 var ApiClient = require('./apiClient');
 
 var ENDPOINT = 'https://api.strem.io';
@@ -59,7 +60,7 @@ function ApiStore(options) {
     this.login = function(params) {
         return this.request('login', params)
             .then(function(result) {
-                userChange(result.authKey, result.user);
+                self.userChange(result.authKey, result.user);
                 addonsUpdated(null, null);
             });
     };
@@ -67,7 +68,7 @@ function ApiStore(options) {
     this.register = function(params) {
         return this.request('register', params)
             .then(function(result) {
-                userChange(result.authKey, result.user);
+                self.userChange(result.authKey, result.user);
                 addonsUpdated(null, null);
             });
     };
@@ -75,7 +76,7 @@ function ApiStore(options) {
     this.logout = function() {
         return this.request('logout')
             .then(function() {
-                userChange(null, null);
+                self.userChange(null, null);
                 addonsUpdated(null, null);
             })
             .catch(function(err) {
@@ -83,7 +84,7 @@ function ApiStore(options) {
                     throw err;
                 }
 
-                userChange(null, null);
+                self.userChange(null, null);
                 addonsUpdated(null, null);
             });
     };
@@ -170,13 +171,13 @@ function ApiStore(options) {
 
     // only invoked when the user is changed by _id (different user)
     // call this with (null, null) when logging out
-    function userChange(authKey, user) {
+    this.userChange = function(authKey, user) {
         storage.setJSON('authKey', authKey);
         storage.setJSON('user', user);
         client = new ApiClient({ endpoint: endpoint, authKey: authKey });
         self.user = user;
         self.events.emit('user-change', user);
-    }
+    };
 
     // this may be invoked when the add-on set is updated
     function addonsUpdated(descriptors, lastModified) {
@@ -197,11 +198,6 @@ function ApiStore(options) {
                 .map(function(x) { return mapURL(x.endpoints[0]) })
         }
         return []
-    }
-
-    function addonsDifferent(a, b) {
-        if (a.length != b.length) return true
-        return a.some(function(x, i) { return b[i].transportUrl != x.transportUrl })
     }
 
     Object.seal(this);
