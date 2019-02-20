@@ -5,6 +5,7 @@
     "author": "Smart Code OOD",
     "license": "MIT",
     "scripts": {
+        "pretest": "eslint --ignore-path .gitignore .",
         "test": "node test/test"
     },
     "repository": {
