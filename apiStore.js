@@ -102,6 +102,8 @@ function ApiStore(options) {
 		var legacyKey = 'addons:' + (self.user ? self.user._id : '');
 		params.addFromURL = mapLegacyAddonRepo(storage.getJSON(legacyKey));
 
+		var lastModifiedOriginal = storage.getJSON('addonsLastModified') || 0;
+
 		return this.request('addonCollectionGet', params)
 			.then(function(resp) {
 				if (!Array.isArray(resp.addons)) {
@@ -110,7 +112,7 @@ function ApiStore(options) {
 
 				var lastModified = storage.getJSON('addonsLastModified') || 0;
 				var newLastModified = new Date(resp.lastModified).getTime();
-				if (resp.addons.length && newLastModified > lastModified) {
+				if (resp.addons.length && lastModified == lastModifiedOriginal && newLastModified > lastModified) {
 					addonsUpdated(resp.addons, newLastModified);
 
 					if (params.addFromURL.length) {
