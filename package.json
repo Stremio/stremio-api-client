@@ -16,7 +16,7 @@
         "events": "1.1.0",
         "node-fetch": "2.2.0",
         "stremio-addon-client": "^1.14.5",
-        "stremio-official-addons": "^1.4.0"
+        "stremio-official-addons": "^1.5.0"
     },
     "devDependencies": {
         "eslint": "^5.14.1",
