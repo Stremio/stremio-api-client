@@ -65,6 +65,20 @@ function ApiStore(options) {
 			});
 	};
 
+	this.loginWithAuthKey = function(params) {
+		client = new ApiClient({ endpoint: this.endpoint, authKey: params.authKey });
+
+		return this.request('getUser')
+			.then(function(user) {
+				if (!(user && user._id)) {
+					throw 'Error while geting user data from API';
+				}
+				storage.setJSON('user', user);
+				self.user = user;
+				self.userChange(params.authKey, self.user)
+			});
+	};
+
 	this.register = function(params) {
 		return this.request('register', params)
 			.then(function(result) {
