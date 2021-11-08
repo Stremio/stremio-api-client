@@ -65,7 +65,7 @@ function ApiStore(options) {
 			});
 	};
 
-	this.loginWithAuthKey = function(params) {
+	this.loginWithToken = function(params) {
 		return this.request('loginWithToken', params)
 			.then(function(result) {
 				self.userChange(result.authKey, result.user);
