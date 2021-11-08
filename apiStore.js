@@ -66,16 +66,10 @@ function ApiStore(options) {
 	};
 
 	this.loginWithAuthKey = function(params) {
-		client = new ApiClient({ endpoint: this.endpoint, authKey: params.authKey });
-
-		return this.request('getUser')
-			.then(function(user) {
-				if (!(user && user._id)) {
-					throw 'Error while geting user data from API';
-				}
-				storage.setJSON('user', user);
-				self.user = user;
-				self.userChange(params.authKey, self.user)
+		return this.request('loginWithToken', params)
+			.then(function(result) {
+				self.userChange(result.authKey, result.user);
+				addonsUpdated(null, null);
 			});
 	};
 
