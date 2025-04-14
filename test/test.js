@@ -64,6 +64,27 @@ tape('register', function(t) {
 		});
 });
 
+tape('authWithApple', function(t) {
+	var userChangeEmitted = false;
+
+	api.events.on('user-change', function(){ userChangeEmitted = true; });
+
+	var token = 'mock.apple.token';
+	var sub = 'mock.apple.sub';
+	var email = 'mock.apple.email';
+	var name = 'mock.apple.name';
+
+	api.authWithApple({ token, sub, email, name })
+		.then(function() {
+			t.ok(api.user, 'api.user exists after Apple auth');
+			t.ok(userChangeEmitted, 'user-change emitted');
+			t.end();
+		})
+		.catch(function(err) {
+			t.error(err);
+		});
+});
+
 // @TODO: proper tests of pullAddonCollection, pushAddonCollection
 // @TODO: to properly test this, first do a addonCollectionSet, and then check if this updates it
 tape('pullAddonCollection', function(t) {

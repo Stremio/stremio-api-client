@@ -73,6 +73,14 @@ function ApiStore(options) {
 			});
 	};
 
+	this.authWithApple = function(params) {
+		return this.request('authWithApple', params)
+			.then(function(result) {
+				self.userChange(result.authKey, result.user);
+				addonsUpdated(null, null);
+			});
+	};
+
 	this.register = function(params) {
 		return this.request('register', params)
 			.then(function(result) {

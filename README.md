@@ -56,6 +56,8 @@ var APIStore = new StremioAPIStore(options)
 
 `APIStore.login({ email, password, fbLoginToken })` - logs in; `fbLoginToken` is optional
 
+`APIStore.authWithApple({ token, sub, email, name })` - authenticates with Apple Sign In; requires token, sub, email, name for authentication
+
 `APIStore.register({ email, password })` - registers a new user
 
 `APIStore.logout()` - logs out
