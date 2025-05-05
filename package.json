@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "events": "1.1.0",
-        "node-fetch": "2.6.1"
+        "node-fetch": "2.6.7"
     },
     "devDependencies": {
         "eslint": "^5.14.1",
